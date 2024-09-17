@@ -1,48 +1,38 @@
 
-import speech_recognition as sr   # Used to convert spoken language into text.
-import webbrowser                   # Opens a web browser to a specified URL.
-import pyttsx3                      # Provides text-to-speech functionality
-import musicLibrary                    # this module we made to store some songs, so that we can directly say jarvis to open the song.
-import requests                         # this is to make http request in order to access news through news api
+import speech_recognition as sr   
+import webbrowser                   
+import pyttsx3                      
+import musicLibrary                  
+import requests                        
 
-from gtts import gTTS                   # Google Text-to-Speech, converts text to speech and saves it as an MP3 file.
-import pygame                              # Handles multimedia functions, like playing audio.
+from gtts import gTTS                   
+import pygame                              
 import os
 
-# Here we are using two-three "text to speech" function
-# pip install pocketsphinx
-
 recognizer = sr.Recognizer()
-engine = pyttsx3.init()                                    # Initializes the text-to-speech engine.
-newsapi = "d07dd927e940405abcd523835d025fd1"
+engine = pyttsx3.init()                                    
+newsapi = "YOURAPIKEY"
 
 def speak_old(text):
-    engine.say(text)       # Converts text into speech using the pyttsx3 engine.
+    engine.say(text)      
     engine.runAndWait()
 
 def speak(text):
-    tts = gTTS(text)            # Converts the text into speech and saves it as an MP3 file named temp.mp3.
+    tts = gTTS(text)           
     tts.save('temp.mp3') 
+    pygame.mixer.init()    
 
-    # Initialize Pygame mixer
-    pygame.mixer.init()    # Initializes the Pygame mixer module for audio playback.
-
-    # Load the MP3 file
-    pygame.mixer.music.load('temp.mp3')    # Loads the MP3 file to be played.
-
-    # Play the MP3 file
-    pygame.mixer.music.play()               #  Plays the loaded MP3 file.
-
-    # Keep the program running until the music stops playing
+    pygame.mixer.music.load('temp.mp3')    
+    pygame.mixer.music.play()              
     while pygame.mixer.music.get_busy():
-        pygame.time.Clock().tick(10)          # Checks if the music is still playing. If yes, the program waits (tick(10) keeps the program running).
+        pygame.time.Clock().tick(10)          
     
-    pygame.mixer.music.unload()        #  Stops and unloads the current music file.
-    os.remove("temp.mp3")               # Deletes the temporary MP3 file to clean up.
+    pygame.mixer.music.unload()       
+    os.remove("temp.mp3")              
 
 
 def processCommand(c):                  
-    if "open google" in c.lower():                     # Opens the specified URL in the default web browser.
+    if "open google" in c.lower():                    
         webbrowser.open("https://google.com")
     elif "open facebook" in c.lower():
         webbrowser.open("https://facebook.com")
@@ -50,7 +40,7 @@ def processCommand(c):
         webbrowser.open("https://youtube.com")
     elif "open linkedin" in c.lower():
         webbrowser.open("https://linkedin.com")
-    elif c.lower().startswith("play"):                    # this is for music
+    elif c.lower().startswith("play"):                  
         song = c.lower().split(" ")[1]
         link = musicLibrary.music[song]
         webbrowser.open(link)
@@ -58,10 +48,8 @@ def processCommand(c):
     elif "news" in c.lower():
         r = requests.get(f"https://newsapi.org/v2/top-headlines?country=in&apiKey={newsapi}")
         if r.status_code == 200:
-            # Parse the JSON response
+           
             data = r.json()
-            
-            # Extract the articles
             articles = data.get('articles', [])
             
             # Print the headlines
@@ -73,16 +61,13 @@ def processCommand(c):
 if __name__ == "__main__":
     speak("Hello My name is Jarvis. How can i help u ?")
     while True:
-        # Listen for the wake word "Jarvis"
-        # obtain audio from the microphone
-        r = sr.Recognizer()             #Creates a Recognizer object to convert speech to text.
-         
+        r = sr.Recognizer()             
         print("recognizing...")
         try:
-            with sr.Microphone() as source:   # Uses the microphone as the audio source.
+            with sr.Microphone() as source:   
                 print("Listening...")
-                audio = r.listen(source, timeout=2, phrase_time_limit=1)      # Listens for speech with a 2-second timeout and 1-second phrase limit.
-            word = r.recognize_google(audio)                                     # Converts the captured audio to text using Google’s speech recognition.
+                audio = r.listen(source, timeout=2, phrase_time_limit=1)      
+            word = r.recognize_google(audio)                                     .
             if(word.lower() == "jarvis"):
                 speak("Yes")
                 # Listen for command
@@ -94,5 +79,5 @@ if __name__ == "__main__":
                     processCommand(command)
 
 
-        except Exception as e:                                                          # Catches and prints any errors that occur during the listening or processing of commands.
+        except Exception as e:                                                         
             print("Error; {0}".format(e))
